@@ -8,7 +8,7 @@
 !*/
 
 # Unignore README file
-README*
+!README
 
 # Ignore object files
 *.o
@@ -16,5 +16,4 @@ README*
 # Ignore Mac OS Spotlight search files
 .DS_Store
 
-.pdf
 !LICENSE
