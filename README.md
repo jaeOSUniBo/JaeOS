@@ -62,7 +62,7 @@ Accendiamo l'emulatore attraverso il tasto __power__ e apriamo un terminale da _
 Clicchiamo sul tasto __play__ fino a esecuzione completata per verificare l'output.
 
 ### INFO E LINK UTILI
-Link per lo sca e informazioni utili su uARM: http://mellotanica.github.io/uARM/                                 Michael Goldweber, Renzo Davoli µMPS2 Principles of Operation. Lulu Books. 2011: http://www.cs.unibo.it/~renzo/so/princOfOperations.pdf
-Michael Goldweber, Renzo Davoli Student Guide to the Kaya Operating System. Lulu Books. 2009: http://www.cs.unibo.it/~renzo/so/Kaya.pdf
-directory contenente le info utili per lo svolgimento del progetto jaeOS per l'anno 2015/2016: http://www.cs.unibo.it/~renzo/so/jaeos16/
-
+Link per il download e informazioni utili su uARM: [http://mellotanica.github.io/uARM/](http://mellotanica.github.io/uARM/)  
+Michael Goldweber, Renzo Davoli *µMPS2 Principles of Operation*. Lulu Books. 2011: [http://www.cs.unibo.it/~renzo/so/princOfOperations.pdf](http://www.cs.unibo.it/~renzo/so/princOfOperations.pdf)  
+Michael Goldweber, Renzo Davoli *Student Guide to the Kaya Operating System*. Lulu Books. 2009: [http://www.cs.unibo.it/~renzo/so/Kaya.pdf](http://www.cs.unibo.it/~renzo/so/Kaya.pdf)  
+Directory contenente le info utili e le specifiche per lo svolgimento del progetto jaeOS per l'anno accademico 2015/2016: [http://www.cs.unibo.it/~renzo/so/jaeos16/](http://www.cs.unibo.it/~renzo/so/jaeos16/)
