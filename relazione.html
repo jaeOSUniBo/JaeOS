@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JaeOS - Gruppo 28 - Relazione</title>
+<style>
+div#container{
+  font-family: "Arial", Times, sans-serif;
+  margin-top: :100px;
+  margin-left: 150px;
+  margin-right: 150px;
+  margin-bottom: 100px;
+}
+span.italic{
+  font-style: italic;
+}
+span.bold{
+  font-weight: bold;
+}
+div#title{
+  text-align: center;
+}
+div#title h1{
+  font-size: 400%;
+  margin-bottom: 30px;
+}
+div#intro, div#organisation, div#features{
+  margin-top: 50px;
+}
+span.list_entry{
+  font-style: italic;
+  font-weight: bold;
+}
+ul.sched_case{
+  list-style-type: square;
+}
+p::first-letter{
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+  <div id="container">
+  <div id="title">
+    <h1>JaeOS</h1>
+    <p>Progetto di Sistemi Operativi</p>
+    <p><span class="bold">prof:</span> <span class="italic">Renzo Davoli</span></p>
+    <p><span class="bold">anno Accademico:</span> 2015/2016</p>
+    <p><span class="bold">Gruppo 28:</span></p>
+    <p>Matteo Del Vecchio</p>
+    <p>Simone Preite</p>
+  </div>
+  <div id="intro">
+    <h2>Intro</h2>
+    <p>Lo sviluppo del progetto si è composto di tre fasi che avevano come scopo ultimo
+      quello di scrivere un sistema operativo minimale <span class="italic">ARM-based</span>.
+      Si è dimostrato molto utile per lo sviluppo l’utilizzo del software <span class="italic">git</span> che ha
+      reso semplice e ordinata l’organizzazione e l’evoluzione del progetto.</p>
+  </div>
+  <div id="organisation">
+    <h2>Organisation</h2>
+    <p>Per la struttura organizzativa si è deciso di dividere i file in base alle fasi di cui è
+      composto ed il <span class="italic">makefile</span> è in grado di compilare tutto il progetto o singolarmente le varie fasi (vedi README.md).
+      L’albero dei sorgenti parte dalla directory <span class="bold">“source”</span> che contiene le directory "<span class="bold">phase0</span>", "<span class="bold">phase1</span>" e "<span class="bold">phase2</span>",
+      che contengono rispettivamente una directory per gli header e una per i sorgenti.</p>
+      <p>Per la prima fase, l’impostazione era dettata per lo più dalle specifiche mentre la seconda fase si compone di cinque file:</p>
+    <ul>
+      <li><span class="list_entry">initial.c</span>
+        <p>main del programma, è l'entry point del progetto. Questo file si occupa di
+          gestire le operazioni iniziali, popolare le aree di memoria e fornire i
+          punti di accesso agli handler per le eccezioni e gli interrupt. Inoltre, vengono
+          disabilitati gli interrupt per queste funzioni in modo tale che quando vi si
+          accede, le operazioni non vengano interrotte appunto da interrupt.</p>
+          <p>Viene allocato il primo processo e inizializzato, quindi messo in <span class="italic">readyQueue</span>
+          per poi richiamare lo scheduler. Il controllo non tornerà mai più nel main.</p>
+        </li>
+      <li><span class="list_entry">scheduler.c</span>
+        <p>contiene, come si evince dal nome, lo <span class="italic">scheduler</span>, che regola l’avvicendarsi dei prcessi ed è strutturato in due casi.</p>
+          <p>Quando esiste un processo corrente, significa che è avvenuto un interrupt o una system call
+          che non ha bloccato il processo su di un semaforo e quindi deve essere ricaricato.
+          In alternativa, ovvero quando il processo corrente è <span class="italic">NULL</span>, siamo nel caso in cui il processo che
+          era in esecuzione si è bloccato su un semaforo oppure è terminato.</p>
+          <p>Ora bisogna valutare due alternative:</p>
+          <ul class="sched_case">
+            <li>C’è un processo in <span class="italic">readyQueue</span>, quindi viene semplicemente prelevato e caricato.
+            </li>
+            <li>Non c’è un processo in <span class="italic">readyQueue</span>, quindi va applicato un semplice algoritmo di <span class="italic">deadlock detection</span>:
+              <ol>
+                <li><span class="italic">processCounter</span> è zero, significa che non ci
+                sono più processi e la macchina può essere arrestata</li>
+                <li><span class="italic">processCounter</span> è maggiore di zero e
+                <span class="italic">softBlockCounter</span> è uguale a zero potrebbe significare che il sistema è in stato di deadlock
+                che viene gestito mandando il sistema in <span class="bold">PANIC</span></li>
+                <li>L’ultimo caso è che sia <span class="italic">processCounter</span> che <span class="italic">softBlockCounter</span> siano maggiori di zero,
+                  significa che ci sono processi bloccati su semafori di device quindi il sistema vieme messo
+                  in stato di <span class="bold">WAIT</span> e aspetta un interrupt, in modo che un processo venga liberato e possa tornare
+                  ad essere eseguito.</li>
+              </ol>
+            </li>
+          </ul>
+        </p>
+      <li><span class="list_entry">interrupts.c</span>
+        <p>questo file contiene i gestori degli interrupt per il terminale, il timer e gli altri device.
+          Un handler centrale viene invocato quando avviene un interrupt, dopodichè la <span class="list_entry">getDeviceNumberFromLineBitmap</span>
+          si occupa di capire quale device lo ha provocato, permettendo di richiamare l’handler per il tipo di device corretto.</p>
+          <p>La funzione <span class="list_entry">acknowledge</span> viene richiamata da tutti i gestori di device e si occupa di gestire le operazioni comuni
+          (opportunamente parametrizzate) ad essi.</p>
+      </li>
+      <li><span class="list_entry">syscall.c</span>
+        <p>In questo file specifico sono state implementate tutte le system call privilegiate richieste dalle specifiche.</p>
+      </li>
+      <li><span class="list_entry">exceptions.c</span>
+        <p>gli handler per le eccezioni sono sviluppati in questo modulo: qui ci sono i punti di accesso
+          in caso di invocazione di una system call, program trap o accessi a zone di memoria non autorizzati.
+          Anche in questo caso, come nella gestione degli interrupt e delle system call, una funzione,
+          la <span class="list_entry">handlerSYSTLBPGM</span>, si occupa di gestire le operazioni comuni ai tre handler.</p>
+      </li>
+    <ul>
+  </div>
+  <div id="features">
+    <h2>Features</h2>
+    <p>Durante la scrittura del codice ci siamo imbattuti in diversi problemi gestionali e sono state quindi prese
+      delle decisioni per cercare di svilupparli nel modo più efficiente. Di seguito sono riportarte le
+      informazioni che ci è sembrato più opportuno fornire nella relazione, il resto sarà commentato all'interno del codice:</p>
+    <ul>
+      <li><span class="list_entry">Generazione dei PID:</span>
+        <p>Per evitare la ripetizione di pid durante l’esecuzione viene utilizzato il timer, quindi la funzione
+           <span class="list_entry">genPid</span> si comporta da generatore pseudo random: il concetto base è quello di prendere
+           i due byte inferiori (del valore del timer) ed utilizzarli per modificare i primi due byte dell’indirizzo del processo ed assegnare
+           il risultato al pid. Si noti infatti che essendo i processi inizializzati in un array, i loro indirizzi fisici
+           sono contingui quindi la parte più significativa dell’indirizzo è quella meno variabile.</p>
+           <p>Inoltre, questo metodo evita di arrivare a situazioni di  <span class="bold">overflow</span> a causa di variabili incrementali.</p>
+        </li>
+      <li><span class="list_entry">Verifica inizializzazione handler (system call 4, 5, 6):</span>
+        <p>all’interno della struttura del processo è stato aggiunto il campo <span class="italic">tags</span> dichiarato come <span class="italic">unsigned int</span>:
+          l’ispirazione è venuta dal modo in cui Linux gestisce i permessi dei file.
+          Viene inizializzato a 0 e man mano che le system call vengono chiamate per specificare l’handler, viene fatto
+          uno <span class="bold">XOR</span> con la maschera per accendere il bit corrispondente (<span class="bold">sys:</span> 0b001 (1), <span class="bold">tlb:</span> 0b010 (2),
+          <span class="bold">pgmtrap:</span> 0b100 (4)); se la variabile ha già il bit corrispondente accesso significa che la system call era
+          stata chiamata in precedenza e il processo viene terminato.</p>
+          <p>Lo stesso meccanismo è utilizzato per verificare se l’handler è stato specificato quando lo si controlla nelle eccezioni.</p>
+      </li>
+      <li><span class="list_entry">Utilizzo di funzioni per evitare ripetizione del codice:</span>
+        <p>durante la stesura non si è potuto non notare che molte parti del codice erano comuni a più elementi
+          quindi sono stati raggruppati in funzioni ausiliare. Questo ci ha permesso di evitare le ripetizioni,
+          rendendo tutto più compatto e facilmente manutenibile.</p>
+      </li>
+      <li><span class="list_entry">Kernel time per interrupt:</span>
+        <p>il tempo trascorso in <span class="bold">kernel time</span> a causa di un <span class="italic">interrupt</span> <span class="list_entry">non</span> viene addebitato al processo corrente
+          perché l’interrupt non è stato causato di sicuro per una richiesta fatta da quest'ultimo ma da
+          uno bloccato su un semaforo in attesa dell’interrupt.</p>
+      <li><span class="list_entry">Set del timer dopo il risveglio da un semaforo:</span>
+        <p>può succedere che un processo resti bloccato su un semaforo ed al suo ritorno in
+          esecuzione è giusto che il timer non venga reinizializzato a <span class="italic">5 ms</span> ma che utilizzi il tempo restante
+          che gli era stato concesso.</p>
+          <p>La tecnica utilizzata è quella di tenere traccia del time slice rimanente in una variabile all’interno
+          della struttura del processo, <span class="italic">remaining</span>, che viene decrementata del tempo che ha già eseguito ogni volta che
+          si ferma su un semaforo.</p>
+          <p>Questa variabile viene inizializzata a 5000 (micro-secondi) nel momento in cui il processo viene allocato e ogni volta che scade il
+            suo time slice.</p>
+      </li>
+      <li><span class="list_entry">Accounting della vita di un processo:</span>
+        <p>Quello che si cerca di fare è di fornire in maniera dettagliata e coerente il tempo che un processo ha trascorso in esecuzione,
+          ovvero la sua vita, estrapolando da questo il tempo trascorso in kernel mode. In questo modo si possono
+          tenere in considerazione tre variabili: <span class="italic">kernel-time, user-time e global-time</span>.</p><p>Il tempo viene registrato
+          ad ogni context switch, quindi nei momenti in cui avviene un interrupt del timer o il processo viene bloccato su un semaforo; inoltre
+          per fornire un dettaglio temporale maggiore, i tempi vengono aggiornati anche nella chiamata alla system call <span class="bold">GETCPUTIME</span>.
+          <br>Per tenere traccia dell'esecuzione si fa ausilio di una variabile, <span class="italic">processStart</span>, che viene inizializzata ogni volta
+          che il processo viene ricaricato e di questo si occupa lo scheduler.</p><p>Mentre, per quanto riguarda il tempo trascorso in Kernel mode, viene
+          utilizzata un'altra variabile, <span class="italic">kernelStart</span>, che viene inizializzata non appena si entra in un handler
+          (a parte quello degli interrupt come detto precedentemente). Il ricalcolo del kernel time del processo viene effettuato quando l'esecuzione
+          della system call torna il controllo all'handler, prima di richiamare lo scheduler.</p>
+      </li>
+      <li><span class="list_entry">Pseudo clock 100 ms:</span>
+        <p>Concettualmente, la gestione dello pseudo clock avviene in modo incrementale, tenendo traccia del tempo trascorso tra un qualsiasi evento e quello precedente (ad esempio la fine di un time slice oppure il caricamento di un processo). Vengono infatti utilizzate due variabili: <span class="italic">clockTick</span>, per tenere traccia della durata dell'ultimo intervallo di tempo tra gli eventi, e <span class="italic">clock</span> che rappresenta il vero valore dello pseudo clock.</p><p>Man mano che gli eventi si susseguono, il valore di clockTick farà incrementare quello di clock, per poi essere nuovamente inizializzato. In particolare, quando tale valore arriva o supera i 100 ms, il timer handler si occupa di calcolare il ritardo e reinizializzare opportunamente lo pseudo clock per tentare di recuperare tale ritardo.</p>
+      </li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

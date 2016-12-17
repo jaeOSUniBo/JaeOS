@@ -1,0 +1,19 @@
+# Ignore all files
+*
+
+# Unignore files with extensions
+!*.*
+
+# Unignore directories
+!*/
+
+# Unignore README file
+!README
+
+# Ignore object files
+*.o
+
+# Ignore Mac OS Spotlight search files
+.DS_Store
+
+.pdf
